@@ -1,0 +1,332 @@
+/* globals describe it*/
+'use strict';
+
+import {should} from 'chai';
+import Actions from '../src/actions.js';
+should();
+
+let data = {
+    'requestId' : 283,
+    'data' : {
+        'requestId' : 283,
+        'agentId' : 10,
+        'amount' : 20000,
+        'purpose' : 'Cash In Cash Out',
+        'repaymentPeriod' : 3,
+        'loanProduct' : 2,
+        'firstname' : 'Deborah',
+        'lastname' : 'Offor',
+        'bvn' : '22180730476',
+        'loanHistory' : [
+            {
+                'serviceType' : 'cdl',
+                'loanAmount' : 50000,
+                'repaymentAmount' : 60000,
+                'interest' : 4,
+                'repaymentFrequency' : 'weekly',
+                'repaymentStatus' : 'complete',
+                'loanDisbursementDate' : '2020-04-06 12:49:30',
+                'repaymentsCount' : 3,
+                'defaultedCount' : 1
+            }
+        ],
+        'transactionStats' : {
+            'sales' : {
+                'totalCount' : 4728,
+                'totalValue' : 35666172,
+                'avgMonthlyValue' : 5944362,
+                'avgMonthlyCount' : 788,
+                'avgDailyValue' : 198145.4, // Median daily total sales value over last 6months
+                'avgDailyCount' : 26.27, // Average daily no of transactions 
+                'medianDailyValue' : 202656.69
+            },
+            'vas' : {
+                'totalCount' : 1058,
+                'totalValue' : 1837232,
+                'avgMonthlyValue' : 306205.33,
+                'avgMonthlyCount' : 176.33,
+                'avgDailyValue' : 10206.85, // Median daily VAS sales value over last 6months
+                'avgDailyCount' : 5.88,
+                'medianDailyValue' : 10908.44
+            },
+            'pos' : {
+                'totalCount' : 2661,
+                'totalValue' : 16879080,
+                'avgMonthlyValue' : 2813180,
+                'avgMonthlyCount' : 443.5,
+                'avgDailyValue' : 93772.67,
+                'avgDailyCount' : 14.78,
+                'medianDailyValue' : 100347
+            },
+            'transfer' : {
+                'totalCount' : 1009,
+                'totalValue' : 16949860,
+                'avgMonthlyValue' : 2824976.67,
+                'avgMonthlyCount' : 168.17,
+                'avgDailyValue' : 94165.89, // Median daily Transfer  sales value over last 6 months
+                'avgDailyCount' : 5.61,
+                'medianDailyValue' : 91138.67
+            },
+            'deposits' : {
+                'totalCount' : 0,
+                'totalValue' : 0,
+                'avgMonthlyValue' : 0,
+                'avgMonthlyCount' : 0,
+                'avgDailyValue' : 0,
+                'avgDailyCount' : 0,
+                'medianDailyValue' : 0
+            },
+            'commissions' : {
+                'totalCount' : 0,
+                'totalValue' : 0,
+                'avgMonthlyValue' : 0,
+                'avgMonthlyCount' : 0,
+                'avgDailyValue' : 0,
+                'avgDailyCount' : 0,
+                'medianDailyValue' : 0
+            }
+        },
+        'fullbiodata1' : {
+            'accountId' : '00000003',
+            'username' : 'debbyoffor',
+            'firstName' : 'Deborah',
+            'lastName' : 'Offor',
+            'gender' : 'Female',
+            'dateOfBirth' : '2020-05-03T19:41:24.0626459',
+            'bvn' : '22180730476',
+            'phoneNumber' : '08072161276',
+            'emailAddress' : 'debbyoffor@gmail.com',
+            'address' : 'Oweh Street',
+            'state' : 'Lagos',
+            'lga' : 'Ikorodu',
+            'isActive' : true,
+            'isBlocked' : false,
+            'isSuspended' : false,
+            'dateOnboarded' : '2020-05-03'
+        },
+        'fullbiodata2' : null,
+        'activeLast7days' : false,
+        'activeLast30days' : true // Active ; transacted in the last 7 days
+    }
+};
+
+let params =  {
+    action: 'multiply',
+    value: 0.3,
+    dataPath: 'data.transactionStats.sales.medianDailyValue'
+};
+let actions = new Actions(data, params);
+
+let methods = [
+    'setFirstNumber',
+    'getFirstNumber',
+    'setSecondNumber',
+    'getSecondNumber',
+    'setNow',
+    'getNow',
+    'setThen',
+    'getThen',
+    'setResult',
+    'getResult',
+    'setParams',
+    'getParams',
+    'setData',
+    'getData',
+    'getDataItem',
+    'multiply',
+    'divide',
+    'add',
+    'substract',
+    'true',
+    'false',
+    'numberOfDays',
+    'numberOfWeeks',
+    'numberOfMonths',
+    'numberOfYears',
+    'request',
+    'run'
+];
+
+let number1 = 4;
+let number2 = 2;
+let input;
+
+describe('#Actions', function(){
+    let final;
+    for (let n in methods){
+        it('should have method ' + methods[n], function(done){
+            actions.should.have.property(methods[n]);
+            done();
+        });
+
+        describe('#Getters and Setters', function(){
+            if(methods[n].substring(0,3) === 'set'){
+
+                let name = methods[n].split('set')[1];
+
+                it('should set and get ' + name, function(done){
+                    if(methods[n] === 'setFirstNumber'){
+                        input = number1;
+                    }
+
+                    if(methods[n] === 'setSecondNumber'){
+                        input = number2;
+                    }
+
+                    if(methods[n] === 'setNow'){
+                        input = new Date().toISOString();
+                    }
+
+                    if(methods[n] === 'setThen'){
+                        input = new Date('2000-01-01').toISOString();
+                    }
+
+                    if(methods[n] === 'setParams'){
+                        input = params;
+                    }
+
+                    if(methods[n] === 'setData'){
+                        input = data;
+                    }
+
+
+                    actions[methods[n]] = input;
+                    
+                    if(methods[n] === 'getDataItem'){
+                        final = actions['get'+name](params.dataPath);
+                    }else{
+                        final = actions['get'+name];
+                    }
+
+                    if(typeof final.toISOString === 'function'){
+                        final.toISOString().should.equal(input);
+                    }else if(methods[n] === 'getDataItem'){
+                        final.should.equal(data.data.transactionStats.sales.medianDailyValue);
+                    }else{
+                        final.should.equal(input);
+                    }
+
+                    done();
+                });
+
+            }
+
+        });
+
+        if(methods[n].substring(0,3) !== 'set' && methods[n].substring(0,3) !== 'get'){
+            it('should execute method ' + methods[n], function(done){
+
+                let mathOps = [
+                    'multiply',
+                    'divide',
+                    'add',
+                    'substract'
+                ];
+
+                let truthOps = [
+                    'true',
+                    'false',
+                ];
+
+                let dateOps = [
+                    'numberOfDays',
+                    'numberOfWeeks',
+                    'numberOfMonths',
+                    'numberOfYears',
+                ];
+
+                if(mathOps.indexOf(methods[n]) > -1){
+                    final = actions[methods[n]](number1, number2);
+                    if(methods[n] === 'multiply'){
+                        final.getResult.should.equal(4*2);
+                    }
+                    if(methods[n] === 'divide'){
+                        final.getResult.should.equal(4/2);
+                    }
+                    if(methods[n] === 'add'){
+                        final.getResult.should.equal(4+2);
+                    }
+                    if(methods[n] === 'substract'){
+                        final.getResult.should.equal(4-2);
+                    }
+
+                    done();
+                }else if(truthOps.indexOf(methods[n]) > -1){
+                    final = actions[methods[n]]();
+                    final.getResult.should.be[methods[n]];
+                    done();
+                }else if(dateOps.indexOf(methods[n]) > -1){
+                    actions.setNow = new Date().toISOString();
+                    actions.setThen = new Date('2000-01-01').toISOString();
+                    final = actions[methods[n]]();
+
+                    final.getResult.should.be.greaterThan(0);
+                    done();
+                }else if(methods[n] === 'run'){
+                    actions[methods[n]]()
+                        .then(function(final){
+                            final.should.equal(data.data.transactionStats.sales.medianDailyValue * params.value);
+                            done();
+                        })
+                        .catch(function(err){
+                            done(err);
+                        });
+                }else if(methods[n] === 'request'){
+                    this.timeout(10000);
+                    actions.setUrl = 'https://eowevaehva5quou.m.pipedream.net/';
+                    actions.setMethod = 'GET';
+                    actions.headers = {testHeader: 'test'};
+                    actions.setData = {testData: 'Testdata'};
+                    actions[methods[n]]('getRequest')
+                        .then(function(final){
+                            final.getResult.status.should.equal(200);
+                            final.getData.requestData.getRequest.should.be.an('object');
+                            actions.setMethod = 'POST';
+                            return actions[methods[n]]('postRequest');
+                        })
+                        .then(function(final){
+                            final.getResult.status.should.equal(200);
+                            final.getData.requestData.getRequest.should.be.an('object');
+                            final.getData.requestData.postRequest.should.be.an('object');
+                            actions.setMethod = 'PUT';
+                            return actions[methods[n]]('putRequest');
+                        })
+                        .then(function(final){
+                            final.getResult.status.should.equal(200);
+                            final.getData.requestData.getRequest.should.be.an('object');
+                            final.getData.requestData.postRequest.should.be.an('object');
+                            final.getData.requestData.putRequest.should.be.an('object');
+                            actions.setMethod = 'PATCH';
+                            return actions[methods[n]]('patchRequest');
+                        })
+                        .then(function(final){
+                            final.getResult.status.should.equal(200);
+                            final.getData.requestData.getRequest.should.be.an('object');
+                            final.getData.requestData.postRequest.should.be.an('object');
+                            final.getData.requestData.putRequest.should.be.an('object');
+                            final.getData.requestData.patchRequest.should.be.an('object');
+                            actions.setMethod = 'DELETE';
+                            return actions[methods[n]]('deleteRequest');
+                        })
+                        .then(function(final){
+                            final.getResult.status.should.equal(200);
+                            final.getData.requestData.getRequest.should.be.an('object');
+                            final.getData.requestData.postRequest.should.be.an('object');
+                            final.getData.requestData.putRequest.should.be.an('object');
+                            final.getData.requestData.patchRequest.should.be.an('object');
+                            final.getData.requestData.deleteRequest.should.be.an('object');
+
+                            done();
+                        })
+                        .catch(function(err){
+                            done(err);
+                        });
+                }
+        
+            });
+
+        }
+    }
+
+});
+

@@ -1,0 +1,23 @@
+{
+  "name": "ruleengine",
+  "version": "1.0.0",
+  "description": "ruleengine",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "nyc mocha"
+  },
+  "author": "iolufemi <iolufemi@ymail.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "json-rules-engine": "^5.0.4",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "chai": "^5.0.0",
+    "eslint": "^8.57.0",
+    "nyc": "^15.1.0"
+  }
+}
