@@ -331,3 +331,7 @@ export default class Actions {
         return this.getResult;
     }
 }
+
+// ToDo: Ability to dump results in a db for latter retrival
+// ToDo: Ability to seed data from a previous dump
+// Ability to trigger rule using a cron
