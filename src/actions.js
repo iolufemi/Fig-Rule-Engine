@@ -312,7 +312,11 @@ export default class Actions {
             config.params = _data;
             config.data = _data;
         }
-        let response = await axios(config);
+        try{
+            let response = await axios(config);
+        }catch(e){
+            throw e;
+        }
         let requestData;
         if(this.getData.requestData){
             requestData = this.getData.requestData
@@ -327,7 +331,11 @@ export default class Actions {
     }
 
     async run (){
-        await Promise.resolve(this[this.getParams.action](this.getParams.value, this.getDataItem(this.getParams.dataPath)));
+        try{
+            await Promise.resolve(this[this.getParams.action](this.getParams.value, this.getDataItem(this.getParams.dataPath)));
+        }catch(e){
+            throw e;
+        }
         return this.getResult;
     }
 }
