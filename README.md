@@ -304,25 +304,29 @@ These operators enable various types of comparisons, providing flexibility in cr
 
 ---
 
-## Example Use Cases
+## Example Use Case
 
-### Use Case 1: Apply Discount for High-Spending Customers
+### Use Case: Apply Discount for High-Spending Customers
 
-**Scenario**: Apply a 10% discount to customers who spend more than $500 in a transaction and have a gold membership status.
+**Scenario**: Apply a 10% discount for customers who spend more than $500 and have a "gold" membership status. This example includes `onSuccess` and `onFailure` handlers to demonstrate different outcomes.
+
+#### Step-by-Step Implementation:
 
 1. **Define Facts**:
    ```javascript
-   const fact1 = new Fact('transaction');
-   fact1.setFact = { amount: 600 };
+   const transactionFact = new Fact('transaction');
+   transactionFact.setFact = { amount: 600 };
 
-   const fact2 = new Fact('customer_status');
-   fact2.setFact = { status: 'gold' };
+   const customerStatusFact = new Fact('customer_status');
+   customerStatusFact.setFact = { status: 'gold' };
    ```
 
 2. **Define Conditions**:
    ```javascript
    const condition1 = new Condition();
-   condition1.fact('transaction').operator('greaterThan').value(500).path('amount');
+   condition1.fact('transaction').operator('greaterThan').value(500).path
+
+('amount');
 
    const condition2 = new Condition();
    condition2.fact('customer_status').operator('equal').value('gold').path('status');
@@ -334,14 +338,21 @@ These operators enable various types of comparisons, providing flexibility in cr
    conditions.all([condition1.getCondition, condition2.getCondition]);
    ```
 
-4. **Create Rule and Link Event**:
+4. **Create Rule with Event, Priority, onSuccess, and onFailure Handlers**:
    ```javascript
    const rule = new Rule('applyDiscount');
-   rule.conditions('promoEligibility').event('discount', { discount: 10 }).priority(1);
+   
+   rule.conditions('promoEligibility')
+        .event('discount', { discount: 10 })
+        .priority(1)
+        .onSuccess(() => console.log('Discount applied successfully'))
+        .onFailure(() => console.log('Discount could not be applied'));
    ```
 
 5. **Execute Rule Engine**:
    ```javascript
    const ruleEngine = new RuleEngine();
-   ruleEngine.run().then(results => console.log(results)); // Applies discount if conditions are met
+   ruleEngine.run().then(results => console.log(results));
+   // Output: 'Discount applied successfully' (if conditions are met)
+   // Output: 'Discount could not be applied' (if conditions are not met)
    ```
