@@ -1,6 +1,6 @@
 'use strict';
 import {Engine, Rule} from 'json-rules-engine';
-import Actions from './src/actions.js';
+import Action from './src/action.js';
 
 export default class RuleEngine {
     constructor(data){
@@ -26,7 +26,7 @@ export default class RuleEngine {
             }
         };
 
-        let action1 = new Actions(this.data, event1.params);
+        let action1 = new Action(this.data, event1.params);
 
         // Condition 1
         let conditions1 = {
@@ -82,7 +82,7 @@ export default class RuleEngine {
             }
         };
 
-        let action2 = new Actions(this.data, event2.params);
+        let action2 = new Action(this.data, event2.params);
 
         let conditions2 = {
             all: [
@@ -130,7 +130,7 @@ export default class RuleEngine {
             }
         };
 
-        let action3 = new Actions(this.data, event3.params);
+        let action3 = new Action(this.data, event3.params);
 
         let conditions3 = {
             all: [
@@ -172,7 +172,7 @@ export default class RuleEngine {
             }
         };
 
-        let action4 = new Actions(this.data, event4.params);
+        let action4 = new Action(this.data, event4.params);
 
         let conditions4 = {
             all: [
@@ -203,7 +203,7 @@ export default class RuleEngine {
             }
         };
 
-        let action5 = new Actions(this.data, event5.params);
+        let action5 = new Action(this.data, event5.params);
 
         let conditions5 = {
             all: [
@@ -293,3 +293,49 @@ export default class RuleEngine {
         });
     }
 }
+
+
+// start the engine
+// add facts to the engine. Facts are data
+// facts has name, and a fact can be removed.
+// You can add a rule to the engine. 
+// rules have name, conditions, events and priority. they also have onSuccess and onFailure functions. The functions are optional and the priority is optional
+// rules can be removed
+// Rules can be updated
+// You can add and remove a custom operator to an engine
+// You can add and remove an operator decorator
+// you can set conditions to an engine
+// you can remove conditions from an engine
+// you can run the engine
+// you can stop the engine
+// You can get fact value from almanac
+// you can store rules to JSON
+// conditions have names
+// AI should be able to configure the rules.
+
+
+
+
+
+
+
+
+
+
+
+
+// Operator
+
+// Decorator
+
+// Engine
+
+// Rule
+
+// Events
+
+// Conditions
+
+// Fact
+
+// Name

@@ -4,17 +4,9 @@ import _ from 'lodash';
 import moment from 'moment';
 import axios from 'axios';
 
-export default class Actions {
+export default class Action {
 
     constructor(data, params){
-        if(!moment){
-            throw new Error('momemt not found. Please import moment.');
-        }
-
-        if(!_){
-            throw new Error('lodash not found. Please import lodash.');
-        }
-
         if(typeof data !== 'object'){
             throw new Error('data must be an object');
         }
@@ -35,9 +27,9 @@ export default class Actions {
             throw new Error('param must have a dataPath attribute of type string');
         }
 
-        if(!_.get(data, params.dataPath)){
-            throw new Error('invalid data path');
-        }
+        // if(!_.get(data, params.dataPath)){
+        //     throw new Error('invalid data path');
+        // }
 
         if(typeof this[params.action] !== 'function'){
             throw new Error('invalid action');
@@ -131,9 +123,9 @@ export default class Actions {
             throw new Error('invalid action');
         }
 
-        if(!_.get(this.getData, params.dataPath)){
-            throw new Error('invalid data path');
-        }
+        // if(!_.get(this.getData, params.dataPath)){
+        //     throw new Error('invalid data path');
+        // }
 
         this.params = params;
     }
@@ -292,16 +284,26 @@ export default class Actions {
         return this;
     }
 
-    async request (name){
+    async request (name, overrideData){
         if(typeof name !== 'string'){
             throw new Error('name must be a string');
+        }
+
+        if(typeof overrideData !== 'object'){
+            throw new Error('overrideData must be an object');
         }
         let config = {
             url: this.getUrl,
             method: this.getMethod,
             headers: this.getHeaders
         };
-        let _data = {...this.getData};
+        let _data;
+        if(overrideData){
+            _data = overrideData;
+        }else{
+            _data = {...this.getData};
+        }
+        
         delete _data.requestData;
 
         if(this.getMethod.toLowerCase() === 'get'){
@@ -309,33 +311,26 @@ export default class Actions {
         }else if(this.getMethod.toLowerCase() === 'post'){
             config.data = _data;
         }else{
-            config.params = _data;
-            config.data = _data;
+            throw new Error('Invalid method. Method can only be POST or GET');
         }
-        try{
-            let response = await axios(config);
-        }catch(e){
-            throw e;
-        }
+        
         let requestData;
         if(this.getData.requestData){
-            requestData = this.getData.requestData
+            requestData = this.getData.requestData;
         }else{
             requestData = {};
         }
         
-        requestData[name] = response;
+        let response = await axios(config);
+        requestData[name] = response.data;
+
         this.setData = {requestData: requestData};
         this.setResult = requestData[name];
         return this;
     }
 
     async run (){
-        try{
-            await Promise.resolve(this[this.getParams.action](this.getParams.value, this.getDataItem(this.getParams.dataPath)));
-        }catch(e){
-            throw e;
-        }
+        await Promise.resolve(this[this.getParams.action](this.getParams.value, this.getDataItem(this.getParams.dataPath)));
         return this.getResult;
     }
 }

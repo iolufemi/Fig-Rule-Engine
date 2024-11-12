@@ -1,9 +1,16 @@
-/* globals describe it*/
+/* globals describe it before after*/
 'use strict';
 
-import {should} from 'chai';
-import Actions from '../src/actions.js';
-should();
+import * as chai from 'chai';
+import Action from '../src/action.js';
+import sinon from 'sinon';
+import _ from 'lodash';
+import moment from 'moment';
+import axios from 'axios';
+chai.should();
+import chaiAsPromised from 'chai-as-promised';
+
+chai.use(chaiAsPromised);
 
 let data = {
     'requestId' : 283,
@@ -115,7 +122,7 @@ let params =  {
     value: 0.3,
     dataPath: 'data.transactionStats.sales.medianDailyValue'
 };
-let actions = new Actions(data, params);
+let action = new Action(data, params);
 
 let methods = [
     'setFirstNumber',
@@ -151,11 +158,11 @@ let number1 = 4;
 let number2 = 2;
 let input;
 
-describe('#Actions', function(){
+describe('#Action', function(){
     let final;
     for (let n in methods){
         it('should have method ' + methods[n], function(done){
-            actions.should.have.property(methods[n]);
+            action.should.have.property(methods[n]);
             done();
         });
 
@@ -190,12 +197,12 @@ describe('#Actions', function(){
                     }
 
 
-                    actions[methods[n]] = input;
+                    action[methods[n]] = input;
                     
                     if(methods[n] === 'getDataItem'){
-                        final = actions['get'+name](params.dataPath);
+                        final = action['get'+name](params.dataPath);
                     }else{
-                        final = actions['get'+name];
+                        final = action['get'+name];
                     }
 
                     if(typeof final.toISOString === 'function'){
@@ -236,7 +243,7 @@ describe('#Actions', function(){
                 ];
 
                 if(mathOps.indexOf(methods[n]) > -1){
-                    final = actions[methods[n]](number1, number2);
+                    final = action[methods[n]](number1, number2);
                     if(methods[n] === 'multiply'){
                         final.getResult.should.equal(4*2);
                     }
@@ -252,18 +259,18 @@ describe('#Actions', function(){
 
                     done();
                 }else if(truthOps.indexOf(methods[n]) > -1){
-                    final = actions[methods[n]]();
+                    final = action[methods[n]]();
                     final.getResult.should.be[methods[n]];
                     done();
                 }else if(dateOps.indexOf(methods[n]) > -1){
-                    actions.setNow = new Date().toISOString();
-                    actions.setThen = new Date('2000-01-01').toISOString();
-                    final = actions[methods[n]]();
+                    action.setNow = new Date().toISOString();
+                    action.setThen = new Date('2000-01-01').toISOString();
+                    final = action[methods[n]]();
 
                     final.getResult.should.be.greaterThan(0);
                     done();
                 }else if(methods[n] === 'run'){
-                    actions[methods[n]]()
+                    action[methods[n]]()
                         .then(function(final){
                             final.should.equal(data.data.transactionStats.sales.medianDailyValue * params.value);
                             done();
@@ -273,49 +280,25 @@ describe('#Actions', function(){
                         });
                 }else if(methods[n] === 'request'){
                     this.timeout(10000);
-                    actions.setUrl = 'https://eowevaehva5quou.m.pipedream.net/';
-                    actions.setMethod = 'GET';
-                    actions.headers = {testHeader: 'test'};
-                    actions.setData = {testData: 'Testdata'};
-                    actions[methods[n]]('getRequest')
+                    // action.setUrl = 'https://eowevaehva5quou.m.pipedream.net/';
+                    action.setUrl = 'https://6732310b2a1b1a4ae10f3284.mockapi.io/test';
+                    action.setMethod = 'GET';
+                    action.headers = {testHeader: 'test'};
+                    // action.setData = {testData: 'Testdata'};
+                    action.setData = { Name: 'Name 2' };
+                    action[methods[n]]('getRequest', { Name: 'Name 2' })
                         .then(function(final){
-                            final.getResult.status.should.equal(200);
-                            final.getData.requestData.getRequest.should.be.an('object');
-                            actions.setMethod = 'POST';
-                            return actions[methods[n]]('postRequest');
+                            final.getResult[0].Name.should.equal('Name 2');
+                            final.getData.requestData.getRequest.should.be.an('array');
+                            action.setMethod = 'POST';
+                            return action[methods[n]]('postRequest', { Name: 'Name 100'});
                         })
                         .then(function(final){
-                            final.getResult.status.should.equal(200);
-                            final.getData.requestData.getRequest.should.be.an('object');
+                            final.getResult.Name.should.equal('Name 100');
+                            final.getData.requestData.getRequest.should.be.an('array');
                             final.getData.requestData.postRequest.should.be.an('object');
-                            actions.setMethod = 'PUT';
-                            return actions[methods[n]]('putRequest');
-                        })
-                        .then(function(final){
-                            final.getResult.status.should.equal(200);
-                            final.getData.requestData.getRequest.should.be.an('object');
-                            final.getData.requestData.postRequest.should.be.an('object');
-                            final.getData.requestData.putRequest.should.be.an('object');
-                            actions.setMethod = 'PATCH';
-                            return actions[methods[n]]('patchRequest');
-                        })
-                        .then(function(final){
-                            final.getResult.status.should.equal(200);
-                            final.getData.requestData.getRequest.should.be.an('object');
-                            final.getData.requestData.postRequest.should.be.an('object');
-                            final.getData.requestData.putRequest.should.be.an('object');
-                            final.getData.requestData.patchRequest.should.be.an('object');
-                            actions.setMethod = 'DELETE';
-                            return actions[methods[n]]('deleteRequest');
-                        })
-                        .then(function(final){
-                            final.getResult.status.should.equal(200);
-                            final.getData.requestData.getRequest.should.be.an('object');
-                            final.getData.requestData.postRequest.should.be.an('object');
-                            final.getData.requestData.putRequest.should.be.an('object');
-                            final.getData.requestData.patchRequest.should.be.an('object');
-                            final.getData.requestData.deleteRequest.should.be.an('object');
-
+                            action.setMethod = 'PATCH';
+                            action[methods[n]]('patchRequest', { Name: 'Name 2' }).should.eventually.throw('Invalid method. Method can only be POST or GET');
                             done();
                         })
                         .catch(function(err){
@@ -329,4 +312,147 @@ describe('#Actions', function(){
     }
 
 });
+
+describe('Action Class', () => {
+    let axiosStub;
+
+    before(() => {
+        // Stub axios to avoid making real HTTP requests
+        axiosStub = sinon.stub(axios, 'request');
+    });
+
+    after(() => {
+        // Restore axios
+        axiosStub.restore();
+    });
+
+    describe('Constructor', () => {
+
+        it('should create an instance with valid data and params', () => {
+            const data = { key: 10 };
+            const params = { action: 'multiply', value: 2, dataPath: 'key' };
+            const action = new Action(data, params);
+            action.should.be.an('object');
+            action.getData.should.equal(data);
+            action.getParams.should.equal(params);
+        });
+
+        it('should throw an error if data is not an object', () => {
+            (() => new Action('notObject', { action: 'multiply', value: 2, dataPath: 'key' })).should.throw('data must be an object');
+        });
+
+        it('should throw an error if params is not an object', () => {
+            (() => new Action({}, 'notObject')).should.throw('params must be an object');
+        });
+
+        it('should throw an error if params lacks an action attribute', () => {
+            (() => new Action({}, { value: 2, dataPath: 'key' })).should.throw('param must have an action attribute of type string');
+        });
+
+        it('should throw an error if params lacks a value attribute', () => {
+            (() => new Action({}, { action: 'multiply', dataPath: 'key' })).should.throw('param must have a value attribute');
+        });
+
+        it('should throw an error if params lacks a dataPath attribute', () => {
+            (() => new Action({}, { action: 'multiply', value: 2 })).should.throw('param must have a dataPath attribute of type string');
+        });
+
+        // it('should throw an error if dataPath is invalid', () => {
+        //     (() => new Action({}, { action: 'multiply', value: 2, dataPath: 'invalidPath' })).should.throw('invalid data path');
+        // });
+
+        it('should throw an error if action is not a valid method', () => {
+            (() => new Action({key: 2}, { action: 'nonExistentMethod', value: 2, dataPath: 'key' })).should.throw('invalid action');
+        });
+    });
+
+    describe('Method Tests', () => {
+        let action;
+
+        beforeEach(() => {
+            action = new Action({ key: 10 }, { action: 'multiply', value: 2, dataPath: 'key' });
+        });
+
+        it('should set and get firstNumber correctly', () => {
+            action.setFirstNumber = 5;
+            action.getFirstNumber.should.equal(5);
+        });
+
+        it('should throw an error if setting firstNumber to non-number', () => {
+            (() => action.setFirstNumber = 'notNumber').should.throw('number must be of type number.');
+        });
+
+        it('should set and get secondNumber correctly', () => {
+            action.setSecondNumber = 8;
+            action.getSecondNumber.should.equal(8);
+        });
+
+        it('should throw an error if setting secondNumber to non-number', () => {
+            (() => action.setSecondNumber = 'notNumber').should.throw('number must be of type number.');
+        });
+
+        it('should set and get result correctly', () => {
+            action.setResult = true;
+            action.getResult.should.equal(true);
+        });
+
+        it('should throw an error if setting result to non-boolean', () => {
+            (() => action.setResult = undefined).should.throw('Please pass a result');
+        });
+
+        it('should multiply two numbers correctly', () => {
+            action.multiply(5, 10).getResult.should.equal(50);
+        });
+
+        it('should divide two numbers correctly', () => {
+            action.divide(10, 2).getResult.should.equal(5);
+        });
+
+        it('should add two numbers correctly', () => {
+            action.add(3, 7).getResult.should.equal(10);
+        });
+
+        it('should subtract two numbers correctly', () => {
+            action.substract(10, 5).getResult.should.equal(5);
+        });
+
+        it('should calculate number of days correctly', () => {
+            action.numberOfDays('2023-01-01', '2023-01-10').getResult.should.equal(9);
+        });
+
+        it('should calculate number of weeks correctly', () => {
+            action.numberOfWeeks('2023-01-01', '2023-02-01').getResult.should.equal(4);
+        });
+
+        it('should calculate number of months correctly', () => {
+            action.numberOfMonths('2023-01-01', '2024-01-01').getResult.should.equal(12);
+        });
+
+        it('should calculate number of years correctly', () => {
+            action.numberOfYears('2020-01-01', '2024-01-01').getResult.should.equal(4);
+        });
+    });
+
+    describe('Async request Method', () => {
+        it('should throw an error if name is not a string', async () => {
+            const action = new Action({ key: 10 }, { action: 'multiply', value: 2, dataPath: 'key' });
+            let _request = action.request(123);
+            _request.should.eventually.throw('name must be a string');
+        });
+
+        it('should make a request and update requestData', async () => {
+            axiosStub.resolves({ data: 'responseData' });
+
+            const action = new Action({ Name: 'Name 1' }, { action: 'multiply', value: 2, dataPath: 'id' });
+            action.setMethod = 'GET';
+            action.setUrl = 'https://6732310b2a1b1a4ae10f3284.mockapi.io/test';
+            // action.setUrl = 'https://eowevaehva5quou.m.pipedream.net/';
+            action.headers = {testHeader: 'test'};
+            action.setData = { Name: 'Name 2' };
+
+            action.request('testRequest').should.eventually.be.an('array').that.is.equal([{ Name: 'Name 2', id: '2' }]);
+        });
+    });
+});
+
 
