@@ -5,7 +5,7 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "npx c8 mocha test"
+    "test": "npx c8 -r text -r html -r json-summary mocha test"
   },
   "author": "iolufemi <iolufemi@ymail.com>",
   "license": "Apache-2.0",
