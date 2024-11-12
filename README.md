@@ -289,9 +289,7 @@ These operators allow for a variety of comparisons to suit complex rule requirem
 
 **Scenario**: A bank wants to flag any transaction over $1000 if it originates from a new device or location.
 
-1. **
-
-Facts**: 
+1. **Facts**: 
    - `transaction_amount`
    - `device_id`
    - `location`
