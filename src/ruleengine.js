@@ -2,12 +2,14 @@
 
 import Name from './name.js';
 import {Engine, Rule, Fact} from 'json-rules-engine';
+import _ from 'lodash'; 
+
 
 export default class RuleEngine {
     artifacts = {};
     #engine;
     constructor(){
-        this.#engine = new Engine();
+        this.#engine = new Engine([], _.get);
 
         let _artifacts = Name.findByType();
         let _thisEngine = this.#engine;
