@@ -1,5 +1,3 @@
-# Fig - Rule Engine
-
 [![Node.js CI](https://github.com/iolufemi/project780/actions/workflows/node.js.yml/badge.svg)](https://github.com/iolufemi/project780/actions/workflows/node.js.yml)
 
 # Fig Rule Engine Documentation
