@@ -1,4 +1,4 @@
-[![Node.js CI](https://github.com/iolufemi/project780/actions/workflows/node.js.yml/badge.svg)](https://github.com/iolufemi/project780/actions/workflows/node.js.yml)
+[![Node.js CI](https://github.com/iolufemi/project780/actions/workflows/node.js.yml/badge.svg)](https://github.com/iolufemi/project780/actions/workflows/node.js.yml) [![codecov](https://codecov.io/gh/iolufemi/project780/graph/badge.svg?token=OkUkkAi7Er)](https://codecov.io/gh/iolufemi/project780)
 
 # Fig Rule Engine Documentation
 
