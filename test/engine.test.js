@@ -1,4 +1,4 @@
-/* globals describe it*/
+/* globals describe it afterEach beforeEach*/
 'use strict';
 import {should} from 'chai';
 should();
@@ -86,12 +86,12 @@ describe('RuleEngine Class', () => {
 
             addRuleStub.getCall(0).args[0].should.be.instanceOf(Rule);
             addRuleStub.getCall(0).args[0].conditions.all[0].fact.should.equal('fact1');
-            addRuleStub.getCall(0).args[0].should.have.property('event').that.deep.equals({ type: 'rule1-event' });
+            addRuleStub.getCall(0).args[0].ruleEvent.should.have.property('type').that.equals('rule1-event');
             addRuleStub.getCall(0).args[0].should.have.property('priority').that.equals(1);
 
             addRuleStub.getCall(1).args[0].should.be.instanceOf(Rule);
             addRuleStub.getCall(1).args[0].conditions.all[0].fact.should.equal('fact2');
-            addRuleStub.getCall(1).args[0].should.have.property('event').that.deep.equals({ type: 'rule2-event' });
+            addRuleStub.getCall(1).args[0].ruleEvent.should.have.property('type').that.equals('rule2-event');
             addRuleStub.getCall(1).args[0].should.have.property('priority').that.equals(2);
             ruleEngine.artifacts.should.have.property('rules').with.lengthOf(2);
             ruleEngine.artifacts.rules[0].rule1.data.key.should.equal('value1');
