@@ -324,9 +324,7 @@ These operators enable various types of comparisons, providing flexibility in cr
 2. **Define Conditions**:
    ```javascript
    const condition1 = new Condition();
-   condition1.fact('transaction').operator('greaterThan').value(500).path
-
-('amount');
+   condition1.fact('transaction').operator('greaterThan').value(500).path('amount');
 
    const condition2 = new Condition();
    condition2.fact('customer_status').operator('equal').value('gold').path('status');
