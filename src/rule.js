@@ -129,7 +129,7 @@ export default class Rule {
             throw new Error('rule not found');
         }
 
-        _rule.onFaliure = _theFunct;
+        _rule.onFailure = _theFunct;
         return this;
     }
 

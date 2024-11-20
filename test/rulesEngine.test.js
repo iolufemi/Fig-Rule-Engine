@@ -467,16 +467,16 @@ describe('Rule Class', () => {
         it('should set the onFailure function', () => {
             const rule = new Rule('testOnFailureRule');
             const failureFunction = (_event, _almanac) => `Failure with ${_event} and ${_almanac}`;
-            rule.onFaliure(failureFunction);
+            rule.onFailure(failureFunction);
 
             const ruleData = Name.find('testOnFailureRule');
-            ruleData.should.have.property('onFaliure').that.is.a('function');
-            ruleData.onFaliure('event', 'almanac').should.equal('Failure with event and almanac');
+            ruleData.should.have.property('onFailure').that.is.a('function');
+            ruleData.onFailure('event', 'almanac').should.equal('Failure with event and almanac');
         });
 
         it('should throw an error if onFailure parameter is not a function', () => {
             const rule = new Rule('testOnFailureRule34');
-            (() => rule.onFaliure('notAFunction')).should.throw('_funct must be a function.');
+            (() => rule.onFailure('notAFunction')).should.throw('_funct must be a function.');
         });
     });
 
