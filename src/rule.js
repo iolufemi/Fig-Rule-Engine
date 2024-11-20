@@ -115,7 +115,7 @@ export default class Rule {
         return this;
     }
 
-    onFaliure(_funct){
+    onFailure(_funct){
         if(typeof _funct !== 'function'){
             throw new Error('_funct must be a function.');
         }
