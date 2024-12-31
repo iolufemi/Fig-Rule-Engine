@@ -36,7 +36,7 @@ describe('RuleEngine Class', () => {
                     event: { type: 'rule1-event' },
                     priority: 1,
                     onSuccess: () => {},
-                    onFaliure: () => {}
+                    onFailure: () => {}
                 },
                 {
                     name: 'rule2',
@@ -45,7 +45,7 @@ describe('RuleEngine Class', () => {
                     event: { type: 'rule2-event' },
                     priority: 2,
                     onSuccess: () => {},
-                    onFaliure: () => {}
+                    onFailure: () => {}
                 }
             ]
         });

@@ -32,7 +32,7 @@ export default class RuleEngine {
 
         // add Rules;
         _artifacts.rule.forEach(function(value){
-            if(value.name && value.conditions && value.event && value.priority && value.onSuccess && value.onFaliure){
+            if(value.name && value.conditions && value.event && value.priority && value.onSuccess && value.onFailure){
                 let _theData = value;
                 let _theRule = new Rule(_theData);
                 _thisEngine.addRule(_theRule);
