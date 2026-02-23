@@ -2,20 +2,39 @@
 
 # Fig Rule Engine Documentation
 
-## Overview
+---
 
-The **Fig Rule Engine** is a flexible tool designed to automate decision-making in business processes. It allows organizations to define custom rules, conditions, and actions that are evaluated against data points called "facts." This engine is particularly useful for customer management, fraud detection, loyalty programs, and personalized marketing.
+## For everyone (plain language)
 
-The Fig Rule Engine is modular and written in TypeScript, making it adaptable for various business cases. Facts, conditions, and rules are registered via a central **Name** registry and then evaluated by the **RuleEngine**.
+**What is this?**  
+The Fig Rule Engine helps you automate decisions. You give it **data** (e.g. “this customer spent $600” or “this customer is gold”), you define **rules** (e.g. “if spend &gt; $500 and status is gold, apply a discount”), and the engine tells you which rules passed or failed and what to do next.
+
+**Why use it?**  
+So you can run promotions, loyalty tiers, fraud checks, or any “if this, then that” logic in one place—without hard-coding every case in your app. Business people can understand the rules; developers plug in the data and run the engine.
+
+**How does it work in one sentence?**  
+You register **facts** (your data), **conditions** (the checks, like “amount greater than 500”), **rules** (which conditions must pass and what happens when they do or don’t), then you **run** the engine and get a result (and optionally call APIs or do calculations).
+
+The rest of this document explains the same ideas in more detail: first for **everyone**, then **technical details** for developers.
+
+---
+
+## Overview (technical)
+
+The **Fig Rule Engine** is a flexible tool designed to automate decision-making in business processes. It allows organizations to define custom rules, conditions, and actions that are evaluated against data points called **facts**. This engine is particularly useful for customer management, fraud detection, loyalty programs, and personalized marketing.
+
+The Fig Rule Engine is modular and written in TypeScript. Facts, conditions, and rules are registered in a central registry and then evaluated by the **RuleEngine**.
 
 ---
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [API at a glance](#api-at-a-glance)
-3. [Core Concepts](#core-concepts)
-4. [Class Details](#class-details)
+1. [For everyone (plain language)](#for-everyone-plain-language)
+2. [Overview (technical)](#overview-technical)
+3. [Installation](#installation)
+4. [API at a glance](#api-at-a-glance)
+5. [Core Concepts](#core-concepts)
+6. [Class Details](#class-details)
    - [Fact Class](#fact-class)
    - [Condition Class](#condition-class)
    - [Conditions Class](#conditions-class)
@@ -23,12 +42,12 @@ The Fig Rule Engine is modular and written in TypeScript, making it adaptable fo
    - [Action Class](#action-class)
    - [RuleEngine Class](#ruleengine-class)
    - [Name Class](#name-class)
-5. [Allowed Operators](#allowed-operators)
-6. [RuleEngine requirements](#ruleengine-requirements)
-7. [Example Use Cases](#example-use-cases)
+7. [Allowed Operators](#allowed-operators)
+8. [RuleEngine requirements](#ruleengine-requirements)
+9. [Example Use Cases](#example-use-cases)
    - [Runnable examples](#runnable-examples)
-8. [Error handling](#error-handling)
-9. [Testing](#testing)
+10. [Error handling](#error-handling)
+11. [Testing](#testing)
 
 ---
 
@@ -68,17 +87,31 @@ TypeScript users get types from the package `types` field (`dist/index.d.ts`). W
 
 ## Core Concepts
 
-### Facts
-**Facts** are individual pieces of data that the Rule Engine uses to evaluate rules. A fact can be an object (e.g. `{ amount: 500 }`) or a function `(params, almanac) => value` for dynamic data. Facts are the building blocks; all conditions and rules depend on them.
+### Facts (your data)
+**Facts** are the data the engine uses to evaluate rules. Examples: “transaction amount is 600”, “customer status is gold”. A fact can be a fixed object (e.g. `{ amount: 500 }`) or a function that returns data when the engine runs. All conditions and rules depend on facts.
 
-### Conditions
-**Conditions** define the criteria that must be met for a rule to activate. Each condition evaluates a fact against an operator and a target value, with an optional `path` (e.g. `amount` or `$.price`) and optional `params`.
+### Conditions (the checks)
+**Conditions** are the criteria that must be met for a rule to trigger. Each condition checks one thing: e.g. “transaction amount greater than 500”, “customer status equal to gold”. You can combine conditions with “all must pass” (AND) or “at least one must pass” (OR).
 
-### Rules
-**Rules** tie a set of conditions to an event, a priority, and **onSuccess** / **onFailure** handlers. When the conditions are met, the rule fires. **Important:** A rule is only registered with the engine if it has **name**, **conditions**, **event**, **priority**, **onSuccess**, and **onFailure** all set.
+### Rules (what happens when)
+**Rules** link a set of conditions to outcomes: when the conditions pass, the rule **fires** and you can run success logic (e.g. apply discount); when they fail, you can run failure logic (e.g. show “not eligible”). Each rule needs a name, conditions, an event, a priority, and both success and failure handlers to be executed by the engine.
 
-### Actions
-**Actions** are operations on data: arithmetic, date differences, booleans, or HTTP requests. They are used when you need to compute values or call APIs based on rule outcomes.
+### Actions (calculations and API calls)
+**Actions** are operations the engine or your code can run: arithmetic (e.g. tax = price × rate), date differences (e.g. days between two dates), or HTTP requests (e.g. fetch data from an API or POST a result to a webhook).
+
+### Key terms used in examples and code
+
+| Term | Meaning |
+|------|--------|
+| **path** | The field name inside the fact object that the condition checks. E.g. `path('amount')` means “use the fact’s `amount` field”. |
+| **priority** | A number (≥ 1) that controls run order when multiple rules could fire: **higher number = runs first**. |
+| **getCondition** | A getter on a Condition that returns the condition in the shape the engine needs. You pass it into `conditions.all([...])` or `conditions.any([...])` to plug that check into a group. |
+| **event params** | Extra data attached to a rule when it fires (e.g. `{ discount: 10 }`, `{ threshold: 100 }`). Your code can read these to know *what value* was used (e.g. “10% off”, “above 100”). |
+| **results.events** | List of rules that fired; each event has a **type** and **params**. |
+| **results.almanacSuccess** | Whether the engine run completed successfully. |
+| **results.failureEvents** | Rules that were evaluated but their conditions did **not** pass (so they did not fire). |
+| **Action params** | For `new Action(data, params)`: **action** = which method to run (e.g. `'multiply'`, `'request'`); **value** = second argument to that method (e.g. tax rate); **dataPath** = key in `data` for the first argument (e.g. `'price'` → 100). |
+| **request(name, overrideData)** | **name** = key to store the HTTP response under (e.g. `getData.requestData['post']`); **overrideData** = for GET sent as query params, for POST sent as request body. |
 
 ---
 
@@ -138,7 +171,7 @@ console.log(condition.getCondition);
 
 - **Constructor:** `new Rule(name: string)`
 - **conditions(conditionsName)**: Links the rule to a named Conditions set (must exist).
-- **event(type, params)**: Sets the event type and optional params when the rule fires.
+- **event(type, params)**: When the rule fires, an event is emitted with a **type** (e.g. `'discount'`) and optional **params** (extra data for whoever handles the event). Params are arbitrary key-value data—e.g. `{ discount: 10 }` (how much to discount), `{ threshold: 100 }` (the cutoff value that defined “high value”), or `{ level: 'premium' }`—so listeners know both *what* happened and *with what values*.
 - **priority(n)**: Sets priority (number **≥ 1**). Higher values run first.
 - **onSuccess(fn)**, **onFailure(fn)**: Handlers `(event, almanac) => …`. **Both must be set** for the rule to be registered with the RuleEngine.
 - **Rule.find(name)**: Returns the **Name** object for that rule (with `getType`, `conditions`, `event`, etc.), not raw data.
@@ -190,7 +223,7 @@ console.log(action.getData.requestData.myRequest); // response data
 ### RuleEngine Class
 
 - **Constructor:** `new RuleEngine()` — Discovers facts and rules via **Name.findByType()** and registers them with the underlying engine. Only rules that have **name**, **conditions**, **event**, **priority**, **onSuccess**, and **onFailure** are added.
-- **run()**: Returns a **Promise** (engine result: events, almanac, etc.).
+- **run()**: Returns a **Promise** with the engine result. Important fields: **events** (array of rules that fired; each has `type` and `params`), **almanacSuccess** (whether the run succeeded), **failureEvents** (rules that were evaluated but did not pass). Your code can use these to apply discounts, log outcomes, or POST to an API.
 - **artifacts** (property): `{ facts?: Array<…>, rules?: Array<…> }` — snapshot of registered facts and rules.
 
 #### Example
@@ -241,19 +274,55 @@ For a rule to be registered and executed by **RuleEngine**:
 
 ### Runnable examples
 
-After `npm run build`, you can run these scripts from the project root:
+After `npm run build`, run any script from the project root (e.g. `node examples/01-high-spending-discount.mjs`).
 
-| Script | Description |
-|--------|-------------|
-| `node examples/01-high-spending-discount.mjs` | AND conditions: discount when amount > 500 and status is gold. |
-| `node examples/02-action-arithmetic.mjs` | **Action** arithmetic and **run()**: multiply (e.g. tax = price × rate). |
-| `node examples/03-date-difference.mjs` | **Action** date helpers: **numberOfDays**, **numberOfMonths**, **numberOfYears**. |
-| `node examples/04-boolean-action.mjs` | **Action** booleans: **true()** and **false()**. |
-| `node examples/05-or-conditions.mjs` | OR conditions (**any**): rule fires when status is gold **or** silver. |
-| `node examples/06-rule-failure.mjs` | Rule that does not fire; **onFailure** runs when conditions are not met. |
-| `node examples/07-api-request.mjs` | **Action** HTTP request: **setUrl**, **setMethod**, **request(name, overrideData)** using a public API (JSONPlaceholder). |
-| `node examples/08-api-as-fact.mjs` | **API as input:** fetch from API, set response as a **Fact**, run rules against it. |
-| `node examples/09-api-notify.mjs` | **API as notify:** run rules, then **POST** the rule result to an API endpoint. |
+| Script | In plain language | Technical note |
+|--------|-------------------|-----------------|
+| `01-high-spending-discount.mjs` | **Promo rule:** Give a discount only when the purchase is over $500 **and** the customer is gold. | AND conditions, success/failure handlers. |
+| `02-action-arithmetic.mjs` | **Calculate tax:** Multiply price by tax rate (e.g. 100 × 0.2 = 20). | Action arithmetic and `run()`. |
+| `03-date-difference.mjs` | **Date math:** Compute days, months, or years between two dates. | `numberOfDays`, `numberOfMonths`, `numberOfYears`. |
+| `04-boolean-action.mjs` | **Yes/no flags:** Set a result to true or false for use in other logic. | Action `true()` / `false()`. |
+| `05-or-conditions.mjs` | **Tier access:** Grant access if the customer is gold **or** silver (either is enough). | OR conditions (`any`). |
+| `06-rule-failure.mjs` | **When the rule doesn’t apply:** Purchase is too small, so no discount; show a “not eligible” outcome. | Rule does not fire; `onFailure` runs. |
+| `07-api-request.mjs` | **Call an API:** Fetch one record from a public demo API (no login). | HTTP GET with Action. |
+| `08-api-as-fact.mjs` | **Use API data in rules:** Fetch data from an API, treat it as a fact, then run rules on it (e.g. “is this post valid?”). | API response → Fact → RuleEngine. |
+| `09-api-notify.mjs` | **Send results to an API:** Run rules, then POST the result (e.g. which rules fired) to a webhook or endpoint. | RuleEngine result → HTTP POST. |
+
+**How to read the examples:** Each file in `examples/` has a short **business summary** at the top (what the example does in plain language), then **line-by-line comments** in the code so both developers and non-developers can follow step by step. Run any example with `node examples/XX-name.mjs` after `npm run build`. At the end of each example, a **Sample result** is printed so you can see the exact structure of the output.
+
+**Sample result and API payload structure:** When you run the examples, you’ll see output like the following.
+
+*Structure of `ruleEngine.run()` result (rule examples 01, 05, 06, 08, 09):*
+
+```json
+{
+  "events": [
+    { "type": "discount", "params": { "discount": 10 } }
+  ],
+  "almanacSuccess": true,
+  "failureEvents": []
+}
+```
+
+- **events** — Array of rules that fired; each has **type** and **params**.
+- **almanacSuccess** — Whether the engine run completed successfully.
+- **failureEvents** — Rules that were evaluated but their conditions did not pass (optional; may be absent on the raw result).
+- **almanac** — Optional runtime fact storage from the engine (when present).
+
+*Structure of the API payload body when POSTing rule result (example 09 — notify):*
+
+```json
+{
+  "events": [
+    { "type": "highValue", "params": { "threshold": 100 } }
+  ],
+  "almanacSuccess": true,
+  "failureEvents": [],
+  "almanac": {}
+}
+```
+
+Your webhook or API can read **events** (what fired and with what params), **almanacSuccess**, **failureEvents**, and **almanac** to log, audit, or react to the rule run.
 
 ### 1. High-spending customer discount
 
