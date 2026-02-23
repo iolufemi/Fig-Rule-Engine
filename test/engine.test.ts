@@ -2,11 +2,11 @@
 'use strict';
 import {should} from 'chai';
 should();
-import RuleEngine from '../src/ruleengine.js';
+import RuleEngine from '../dist/ruleengine.js';
 import sinon from 'sinon';
 import { Engine, Rule, Fact } from 'json-rules-engine';
-import Name from '../src/name.js';
-import Condition from '../src/condition.js';
+import Name from '../dist/name.js';
+import Condition from '../dist/condition.js';
 
 
 describe('RuleEngine Class', () => {

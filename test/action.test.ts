@@ -2,7 +2,7 @@
 'use strict';
 
 import * as chai from 'chai';
-import Action from '../src/action.js';
+import Action from '../dist/action.js';
 import sinon from 'sinon';
 import _ from 'lodash';
 import moment from 'moment';

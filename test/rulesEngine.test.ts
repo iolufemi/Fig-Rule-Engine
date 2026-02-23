@@ -3,11 +3,11 @@
 import {should} from 'chai';
 should();
 
-import Name from '../src/name.js';
-import Fact from '../src/fact.js';
-import Conditions from '../src/conditions.js';
-import Condition from '../src/condition.js';
-import Rule from '../src/rule.js';
+import Name from '../dist/name.js';
+import Fact from '../dist/fact.js';
+import Conditions from '../dist/conditions.js';
+import Condition from '../dist/condition.js';
+import Rule from '../dist/rule.js';
 
 
 describe('Name Class', () => {
